@@ -11,13 +11,17 @@ class FeatureMaker(object):
         for test_case in self.test_cases_list:
             test_file = open(self.path_dir + test_case, 'r')
             source_code = test_file.readlines()
-            source_code = self._check_ignore(source_code)
-            print(test_case, source_code)
+            source_code = self._clean_up_code(source_code)
+            print("// " + test_case)
+            for line in source_code:
+                print(line)
+            print()
             test_file.close()
 
-    def _check_ignore(self, source_code):
-        modified_code = []
+    def _clean_up_code(self, source_code):
+        clean_code = []
         comment_flag = False
+        # string_flag = False
 
         for line in source_code:
             if comment_flag:
@@ -28,12 +32,10 @@ class FeatureMaker(object):
                     continue
             if "#include" in line:
                 continue
+            if "#define" in line:
+                line = line.split("#define")[1]
             if "//" in line:
                 line = line.split("//")[0]
-            if '{' in line:
-                line = line.replace('{', '')
-            if '}' in line:
-                line = line.replace('}', '')
             if "/*" in line:
                 if "*/" in line:
                     first_part = line.split("/*")[0]
@@ -42,11 +44,16 @@ class FeatureMaker(object):
                 else:
                     line = line.split("/*")[0]
                     comment_flag = True
+            line = line.replace('(', ' ').replace('{', ' ').replace('[', ' ')
+            line = line.replace(')', ' ').replace('}', ' ').replace(']', ' ')
+            line = line.replace('+', ' ').replace('-', ' ').replace(',', ' ').replace('!', ' ').replace(';', ' ')
+            line = line.replace('=', ' ').replace('>', ' ').replace('<', ' ').replace('*', ' ').replace('&', ' ')
+            line = line.replace('\\"', ' ')
+            line = line.strip()
 
-            line = line.strip().rstrip(';')
             if line != '':
-                modified_code.append(line)
-        return modified_code
+                clean_code.append(line)
+        return clean_code
 
 
 class TestCaseInfo(object):
