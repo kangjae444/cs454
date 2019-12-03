@@ -10,8 +10,8 @@ class FeatureMaker(object):
         self.term_list = []
         self.case_info_list = []
 
-        self._find_all_terms()
-        self._make_feature_vectors()
+        self._find_all_terms()          # complete self.term_list and update self.case_info_list
+        self._make_feature_vectors()    # complete self.case_info_list
 
     def term_num(self):
         return len(self.term_list)
@@ -20,11 +20,11 @@ class FeatureMaker(object):
         replaced_letters_list = ['(', ')', '{', '}', '<', '>', '[', ']', '+', '-', '*', '/', '%', '=',
                                  ',', '!', '&', '|', ';', '.', '\\"']
 
-        def _clean_up_code(dirty_code):
+        def _clean_up_code(raw_code):
             clean_code = []
             comment_flag = False
 
-            for line in dirty_code:
+            for line in raw_code:
                 if comment_flag:
                     if "*/" in line:
                         line = line.split("*/")[1]
@@ -89,9 +89,14 @@ class FeatureMaker(object):
     def _make_feature_vectors(self):
         for case_info in self.case_info_list:
             vector = [0]*self.term_num()
+            for term in case_info.get_term_info().keys():
+                vector[self.term_list.index(term)] = case_info.get_term_info()[term]
             case_info.set_vector(vector)
 
 
-fm = FeatureMaker()
-print(fm.term_list)
-print(fm.case_info_list)
+if __name__ == '__main__':
+    feature_maker = FeatureMaker()
+    print("terms({0}): {1}".format(feature_maker.term_num(), feature_maker.term_list))
+    for case in feature_maker.case_info_list:
+        print(case)
+        print(case.get_vector())
