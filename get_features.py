@@ -1,5 +1,6 @@
 import os
 import re
+from test_case_info import TestCaseInfo
 
 
 class FeatureMaker(object):
@@ -7,7 +8,10 @@ class FeatureMaker(object):
         self._path_dir = path_dir
         self._test_cases_list = os.listdir(path_dir)
         self.term_list = []
+        self.case_info_list = []
+
         self._find_all_terms()
+        self._make_feature_vectors()
 
     def term_num(self):
         return len(self.term_list)
@@ -55,30 +59,39 @@ class FeatureMaker(object):
             return clean_code
 
         for test_case in self._test_cases_list:
+            test_case_info = TestCaseInfo(test_case)
             test_file = open(self._path_dir + test_case, 'r')
             source_code = test_file.readlines()
+
             source_code = _clean_up_code(source_code)
             for clean_line in source_code:
                 term_list = clean_line.split()
                 for term in term_list:
-                    if self._is_new_term(term):
-                        self.term_list.append(term)
+                    if self._is_not_number(term):
+                        test_case_info.update_term_info(term)
+                        if self._is_new_term(term):
+                            self.term_list.append(term)
+
             test_file.close()
+            self.case_info_list.append(test_case_info)
         self.term_list.sort()
 
-    def _is_new_term(self, term):
-        if term in self.term_list:
-            return False
+    def _is_not_number(self, term):
         if term.isdigit() or term[:2] == "0x":
             return False
         return True
 
+    def _is_new_term(self, term):
+        if term in self.term_list:
+            return False
+        return True
 
-class TestCaseInfo(object):
-    def __init__(self, file_name):
-        self.file_name = file_name
-        self.features = []
+    def _make_feature_vectors(self):
+        for case_info in self.case_info_list:
+            vector = [0]*self.term_num()
+            case_info.set_vector(vector)
 
 
 fm = FeatureMaker()
 print(fm.term_list)
+print(fm.case_info_list)
