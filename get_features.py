@@ -7,8 +7,8 @@ class FeatureMaker(object):
     def __init__(self, path_dir="./test_cases/"):
         self._path_dir = path_dir
         self._test_cases_list = os.listdir(path_dir)
-        self.term_list = []
-        self.case_info_list = []
+        self.term_list = []             # list of term strings
+        self.case_info_list = []        # list of TestCaseInfo
 
         self._find_all_terms()          # complete self.term_list and update self.case_info_list
         self._make_feature_vectors()    # complete self.case_info_list
